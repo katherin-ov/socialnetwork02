@@ -31,8 +31,6 @@ def index(request):
 def post_edit(request, post_id):
     post = get_object_or_404(Post, pk=post_id)
     group = Group.objects.all()
-    if not request.user.is_authenticated:
-        return redirect('/posts/<post_id>/')
     if request.user != post.author:
         return redirect('posts:post_detail', pk=post_id)
     is_edit = True
