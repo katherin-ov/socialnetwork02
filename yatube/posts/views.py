@@ -32,7 +32,7 @@ def post_edit(request, post_id):
     post = get_object_or_404(Post, pk=post_id)
     group = Group.objects.all()
     if request.user != post.author:
-        return redirect('posts:post_detail', pk= post_id)
+        return redirect('posts:post_detail', pk=post_id)
     is_edit = True
     form = PostForm(request.POST or None)
     if form.is_valid():
