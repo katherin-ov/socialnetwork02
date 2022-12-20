@@ -58,7 +58,7 @@ def post_create(request):
         post = form.save(commit=False)
         post.author = request.user
         post.save()
-        return redirect('posts:post_detail', post.pk)
+        return redirect('posts:profile', username=post.author.username)
     return render(request, template_name, {'form': form})
 
 
