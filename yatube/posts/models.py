@@ -29,4 +29,3 @@ class Post(models.Model):
         blank=True,
         null=True,
     )
-
