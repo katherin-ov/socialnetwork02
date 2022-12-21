@@ -4,47 +4,39 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.core.paginator import Paginator
 from django.contrib.auth.decorators import login_required
 
-LIMIT = 10
+POST_PAGE_LIMIT = 10
 
 
-def post_sort(queryset, request):
-    paginator = Paginator(queryset, LIMIT)
+def paginate_post(queryset, request):
+    paginator = Paginator(queryset, POST_PAGE_LIMIT)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
     return {
-        'paginator': paginator,
-        'page_number': page_number,
         'page_obj': page_obj,
     }
 
 
 def index(request):
-    post_list = Post.objects.all().order_by('-pub_date')
+    page_obj = paginate_post(Post.objects.all(), request)
     context = {
-        'posts': post_list,
+        'page_obj': page_obj
     }
-    context.update(post_sort(post_list, request))
+    context.update(page_obj)
     return render(request, 'posts/index.html', context)
 
 
 @login_required
 def post_edit(request, post_id):
     post = get_object_or_404(Post, pk=post_id)
-    group = Group.objects.all()
     if request.user != post.author:
         return redirect('posts:post_detail', post.pk)
     is_edit = True
     form = PostForm(request.POST or None, instance=post)
     if form.is_valid():
-        post = form.save(commit=False)
-        post.author = request.user
-        post.save()
         return redirect('posts:post_detail', post.pk)
     context = {
         'form': form,
         'is_edit': is_edit,
-        'group': group,
-        'post_id': post.pk,
     }
     return render(request, 'posts/post_create.html', context)
 
@@ -67,7 +59,7 @@ def group_posts(request, slug):
     context = {
         'group': group,
     }
-    context.update(post_sort(post_list, request))
+    context.update(paginate_post(post_list, request))
     return render(request, 'posts/group_list.html', context)
 
 
@@ -80,7 +72,7 @@ def profile(request, username):
         'user_posts': user_posts,
         'author': author,
     }
-    context.update(post_sort(user_posts, request))
+    context.update(paginate_post(user_posts, request))
     return render(request, 'posts/profile.html', context)
 
 
